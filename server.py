@@ -1,7 +1,7 @@
 """Make some requests to OpenAI's chatbot"""
 
 import time
-import os 
+import os
 import flask
 import sys
 
@@ -9,8 +9,12 @@ from flask import g
 
 from playwright.sync_api import sync_playwright
 
-PROFILE_DIR = "/tmp/playwright" if '--profile' not in sys.argv else sys.argv[sys.argv.index('--profile') + 1]
-PORT = 5001 if '--port' not in sys.argv else int(sys.argv[sys.argv.index('--port') + 1])
+PROFILE_DIR = (
+    "/tmp/playwright"
+    if "--profile" not in sys.argv
+    else sys.argv[sys.argv.index("--profile") + 1]
+)
+PORT = 5001 if "--port" not in sys.argv else int(sys.argv[sys.argv.index("--port") + 1])
 APP = flask.Flask(__name__)
 PLAY = sync_playwright().start()
 BROWSER = PLAY.firefox.launch_persistent_context(
@@ -19,6 +23,7 @@ BROWSER = PLAY.firefox.launch_persistent_context(
     java_script_enabled=True,
 )
 PAGE = BROWSER.new_page()
+
 
 def get_input_box():
     """Find the input box by searching for the largest visible one."""
@@ -32,11 +37,13 @@ def get_input_box():
                 candidate = textarea
     return candidate
 
+
 def is_logged_in():
     try:
         return get_input_box() is not None
     except AttributeError:
         return False
+
 
 def send_message(message):
     # Send the message
@@ -47,11 +54,13 @@ def send_message(message):
     while PAGE.query_selector(".result-streaming") is not None:
         time.sleep(0.1)
 
+
 def get_last_message():
     """Get the latest message"""
     page_elements = PAGE.query_selector_all("div.group.w-full")
     last_element = page_elements[-1]
     return last_element.inner_text()
+
 
 @APP.route("/chat", methods=["GET"])
 def chat():
@@ -62,6 +71,7 @@ def chat():
     print("Response: ", response)
     return response
 
+
 def start_browser():
     PAGE.goto("https://chat.openai.com/")
     APP.run(port=PORT, threaded=False)
@@ -71,6 +81,7 @@ def start_browser():
         input()
     else:
         print("Logged in")
-        
+
+
 if __name__ == "__main__":
     start_browser()
