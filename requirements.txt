@@ -1,3 +1,4 @@
 flask
 playwright
 requests
+black==23.3.0
